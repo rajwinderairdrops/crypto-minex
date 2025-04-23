@@ -126,3 +126,41 @@
   </div>
 </body>
 </html>
+<!-- Display balance -->
+<div id="balance">Balance: <span id="current_balance">0</span> BTC</div>
+
+<!-- Coin selection -->
+<div class="coin-selection">
+  <button onclick="selectCoin('btc')">BTC</button>
+  <button onclick="selectCoin('eth')">ETH</button>
+  <button onclick="selectCoin('doge')">DOGE</button>
+  <!-- Add more coins as needed -->
+</div>
+
+<!-- Coin Mining Section (for each coin) -->
+<div id="btc-mining" class="mining-section">
+  <p>Mining BTC...</p>
+  <div>Hashes Claimed: <span id="btc-hashes">0</span></div>
+  <a href="https://latesttech6454.blogspot.com/?m=1" target="_blank">Visit our blog</a>
+</div>
+
+<div id="eth-mining" class="mining-section" style="display:none;">
+  <p>Mining ETH...</p>
+  <div>Hashes Claimed: <span id="eth-hashes">0</span></div>
+  <a href="https://latesttech6454.blogspot.com/?m=1" target="_blank">Visit our blog</a>
+</div>
+
+<!-- Add similar sections for other coins -->
+
+<!-- JS for switching between coins and updating mining -->
+<script>
+  function selectCoin(coin) {
+    // Hide all mining sections
+    document.querySelectorAll('.mining-section').forEach(section => {
+      section.style.display = 'none';
+    });
+
+    // Show selected coin's mining section
+    document.getElementById(coin + '-mining').style.display = 'block';
+  }
+</script>
