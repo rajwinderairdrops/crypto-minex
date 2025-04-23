@@ -1,111 +1,128 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CryptoMineX - Cloud Mining Platform</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Mining Dashboard</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      color: #fff;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    header {
-      background: #111;
-      padding: 20px;
-      text-align: center;
-      font-size: 26px;
-      font-weight: bold;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-    }
-    .container {
-      flex: 1;
-      padding: 40px 20px;
-      max-width: 600px;
-      margin: auto;
-      text-align: center;
-    }
-    .container h2 {
-      font-size: 28px;
-      margin-bottom: 20px;
-    }
-    .stats {
-      font-size: 22px;
-      margin: 20px 0;
-    }
-    .btn {
-      padding: 15px 35px;
-      background: #00c853;
-      border: none;
-      font-size: 18px;
-      color: white;
-      cursor: pointer;
-      border-radius: 5px;
-      transition: background 0.3s;
-    }
-    .btn:hover {
-      background: #00e676;
-    }
-    footer {
-      padding: 15px;
-      text-align: center;
-      font-size: 14px;
-      background: #111;
-      color: #aaa;
-    }
-    @media (max-width: 480px) {
-      .container h2 {
-        font-size: 22px;
-      }
-      .stats {
-        font-size: 18px;
-      }
-      .btn {
-        width: 90%;
-      }
-    }
+    body { background: #111; color: #fff; font-family: sans-serif; text-align: center; padding: 30px; }
+    .tabs { margin-bottom: 20px; }
+    .tab { display: inline-block; margin: 0 10px; cursor: pointer; color: #0f0; }
+    .active { font-weight: bold; text-decoration: underline; }
+    .hash-box { font-size: 24px; margin: 20px 0; }
+    .btn { padding: 10px 20px; font-size: 16px; background: #0f0; color: #000; border: none; cursor: pointer; }
+    .btn:disabled { background: #555; cursor: not-allowed; }
+    .menu { position: fixed; top: 15px; right: 20px; cursor: pointer; font-size: 24px; }
+    .dropdown { display: none; background: #222; position: absolute; right: 20px; top: 50px; border: 1px solid #0f0; padding: 10px; }
+    .dropdown a { color: #0f0; text-decoration: none; display: block; margin: 10px 0; }
+    #progress-bar { width: 100%; background-color: #444; }
+    #progress { height: 25px; width: 0%; background-color: #0f0; }
   </style>
 </head>
 <body>
-
-  <header>CryptoMineX</header>
-
-  <div class="container">
-    <h2>Start Mining & Earn Free Bitcoin</h2>
-    <p class="stats">Mined: <span id="minedAmount">0.00000000</span> BTC</p>
-    <button class="btn" onclick="toggleMining()">Start Mining</button>
+  <!-- Dropdown Menu -->
+  <div class="menu" onclick="toggleMenu()">⋮</div>
+  <div class="dropdown" id="dropdownMenu">
+    <a href="https://latesttech6454.blogspot.com/?m=1" target="_blank">View Ads</a>
+    <a href="https://latesttech6454.blogspot.com/?m=1" target="_blank">Surveys</a>
+    <a href="https://latesttech6454.blogspot.com/?m=1" target="_blank">Offerwall</a>
   </div>
 
-  <footer>
-    &copy; 2025 CryptoMineX. All rights reserved.
-  </footer>
+  <!-- Heading -->
+  <h1>CryptoMineX Dashboard</h1>
+  <p>Mining to wallet: <strong id="walletAddress"></strong></p>
+
+  <!-- Coin Tabs -->
+  <div class="tabs" id="coinTabs">
+    <span class="tab active" onclick="switchCoin('BTC')">BTC</span>
+    <span class="tab" onclick="switchCoin('ETH')">ETH</span>
+    <span class="tab" onclick="switchCoin('DOGE')">DOGE</span>
+    <span class="tab" onclick="switchCoin('LTC')">LTC</span>
+    <span class="tab" onclick="switchCoin('SHIBA')">SHIBA</span>
+  </div>
+
+  <!-- Hashrate Display -->
+  <div class="hash-box">
+    <span id="coin">BTC</span> Hashrate: <span id="hashrate">0</span> H/s
+  </div>
+
+  <!-- Claim Button -->
+  <button id="claimBtn" class="btn" onclick="claimHash()" disabled>Claim 5 Hash</button>
+
+  <!-- Fake Balance Display -->
+  <div>
+    <p>Fake Balance: <strong id="fakeBalance">0</strong> $</p>
+  </div>
+
+  <!-- Progress Bar -->
+  <div id="progress-bar">
+    <div id="progress"></div>
+  </div>
 
   <script>
-    let isMining = false;
-    let minedAmount = 0;
-    let miningInterval;
+    // Wallet and Coin Selection
+    const urlParams = new URLSearchParams(window.location.search);
+    const wallet = urlParams.get('wallet');
+    document.getElementById('walletAddress').innerText = wallet;
 
-    function toggleMining() {
-      const btn = document.querySelector('.btn');
-      if (!isMining) {
-        btn.textContent = 'Stop Mining';
-        miningInterval = setInterval(() => {
-          minedAmount += Math.random() * 0.0000007;
-          document.getElementById('minedAmount').textContent = minedAmount.toFixed(8);
-        }, 1000);
-        isMining = true;
-      } else {
-        btn.textContent = 'Start Mining';
-        clearInterval(miningInterval);
-        isMining = false;
+    let coin = 'BTC';
+    let hash = 0;
+    let fakeBalance = 0;
+    const claimBtn = document.getElementById('claimBtn');
+    const progressBar = document.getElementById('progress');
+
+    // Switch Coin Function
+    function switchCoin(selected) {
+      coin = selected;
+      document.getElementById('coin').innerText = coin;
+      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    // Toggle Dropdown Menu
+    function toggleMenu() {
+      const menu = document.getElementById('dropdownMenu');
+      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // Claim Hash and Redirect to Ad
+    function claimHash() {
+      if (hash >= 5) {
+        fakeBalance += 0.5; // Simulated reward
+        document.getElementById('fakeBalance').innerText = fakeBalance.toFixed(2);
+        hash = 0; // Reset hash
+        document.getElementById('hashrate').innerText = hash;
+        progressBar.style.width = '0%'; // Reset progress bar
+
+        // Redirect user to view ads or survey to earn more
+        window.location.href = "https://latesttech6454.blogspot.com/?m=1";
       }
     }
+
+    // Mining Logic (Slow speed & timer)
+    setInterval(() => {
+      hash += 1;
+      document.getElementById('hashrate').innerText = hash;
+      if (hash >= 5) {
+        claimBtn.disabled = false;
+      } else {
+        claimBtn.disabled = true;
+      }
+
+      // Update progress bar based on hash count
+      let progressPercent = (hash / 5) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+    }, 2000); // Slow mining (1 hash every 2 seconds)
   </script>
 
+  <!-- Ad Integration -->
+  <script async src="https://cdn.adsterra.com/banner.js"></script>
+  <div id="adsterra-ad" style="margin-top: 20px;">
+    <!-- Adsterra ad banner -->
+    <script>
+      // Example for placing an Adsterra banner ad
+      document.write('<iframe src="https://adsterra.com/banner/ad-id" frameborder="0" width="100%" height="100px"></iframe>');
+    </script>
+  </div>
 </body>
 </html>
