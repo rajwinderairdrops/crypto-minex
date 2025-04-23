@@ -51,7 +51,7 @@
 
   <!-- Fake Balance Display -->
   <div>
-    <p>Fake Balance: <strong id="fakeBalance">0</strong> $</p>
+    <p>Balance: <strong id="Balance">0</strong> $</p>
   </div>
 
   <!-- Progress Bar -->
@@ -67,7 +67,7 @@
 
     let coin = 'BTC';
     let hash = 0;
-    let fakeBalance = 0;
+    let Balance = 0;
     const claimBtn = document.getElementById('claimBtn');
     const progressBar = document.getElementById('progress');
 
@@ -88,8 +88,8 @@
     // Claim Hash and Redirect to Ad
     function claimHash() {
       if (hash >= 5) {
-        fakeBalance += 0.5; // Simulated reward
-        document.getElementById('fakeBalance').innerText = fakeBalance.toFixed(2);
+        Balance += 0.5; // Simulated reward
+        document.getElementById('Balance').innerText = Balance.toFixed(2);
         hash = 0; // Reset hash
         document.getElementById('hashrate').innerText = hash;
         progressBar.style.width = '0%'; // Reset progress bar
